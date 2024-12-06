@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Reisegruppe Verdächtig Ticket Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  
   <script src="https://unpkg.com/html5-qrcode"></script>
   <!-- Futuristic Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,71 +11,75 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
-    html, body {
-      margin: 0; 
-      padding: 0;
-      height: 100%;
-      width: 100%;
+    html {
+      font-size: 22px; /* Größere Grundschrift für mobile Geräte */
     }
 
     body {
       font-family: 'Orbitron', sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      /* Alle Elemente um 100% vergrößern */
-      transform: scale(2);
-      transform-origin: top left;
+      padding-top: 20px;
       
-      /* Crazy tribal Hintergrundmuster: Kombination aus radialen Kreisen und gradient */
+      /* Hintergrund: unten dunkler Verlauf, darüber Smileys, darüber neon Patterns */
       background:
-        radial-gradient(circle at 20% 20%, #00ffcc 2%, transparent 2%) repeat,
-        radial-gradient(circle at 80% 80%, #ff3333 2%, transparent 2%) repeat,
+        /* Obere Layer (Neon-Kreise) */
+        radial-gradient(circle at 70% 70%, #ffff33 5%, transparent 20%),
+        radial-gradient(circle at 30% 30%, #ff6600 5%, transparent 20%),
+        /* Geometrische Muster */
+        repeating-linear-gradient(-45deg, #00ffcc 0, #00ffcc 15px, transparent 15px, transparent 30px),
+        repeating-linear-gradient(45deg, #ff0099 0, #ff0099 10px, transparent 10px, transparent 20px),
+        /* Smileys-Muster (SVG Data URL) */
+        url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22100%22%20height=%22100%22%3E%3Ctext%20x=%2250%25%22%20y=%2250%25%22%20dominant-baseline=%22middle%22%20text-anchor=%22middle%22%20font-size=%2230%22%3E%F0%9F%99%82%3C/text%3E%3C/svg%3E') repeat,
+        /* Dunkler Grundverlauf */
         linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
-      background-size: 100px 100px;
+        
+      background-size: auto, auto, auto, auto, 100px 100px, cover; /* Smileys ca. alle 100px */
+      background-attachment: fixed;
       color: #fff;
-      text-align: center;
-      padding-top: 50px;
     }
 
     h1 {
-      font-size: 2em;
+      font-size: 2.5em;
       margin-bottom: 20px;
       color: #00ffcc;
       text-shadow: 0 0 8px #00ffcc;
     }
 
     #reader {
-      width: 300px;
+      width: 90vw; /* Breiter, aber an Bildschirmbreite angepasst */
+      max-width: 350px;
       margin: 20px auto;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 10px #00ffcc;
       padding: 10px;
-      /* Damit das Kamerabild nicht über den Rand hinausgeht */
-      overflow: hidden;
+      overflow: hidden; /* verhindert, dass das Kamerabild über die Box hinausgeht */
     }
 
     #result {
       font-size: 1.5em;
-      margin-top: 30px;
+      margin-top: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100px;
+      width: 90vw;
+      max-width: 350px;
     }
 
     .message-box {
       padding: 20px;
       border-radius: 10px;
-      width: 80%;
-      max-width: 500px;
       font-size: 1.2em;
       line-height: 1.4;
       text-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
 
-    /* Futuristic neon styles for different statuses */
     .message-ok {
       background-color: #004d40; /* Dark greenish */
       border: 2px solid #00ffcc;
@@ -103,7 +108,11 @@
   <div id="result"></div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz3mJncfLJPHxNcs1RyiAqiFpWvQAvtI_7Si_7pzG80IA90SZiMW1Ag_WhzfYlHhMrd/exec'; // Replace with your deployed Apps Script web app URL
+    const WEB_APP_URL = 'YOUR_BASE64_ENCODED_URL'; // Hier später per atob() dekodieren, falls gewünscht
+
+    // Beispiel mit dekodierung (falls Sie den Link verschleiern wollen):
+    // const encodedUrl = "IHRE_BASE64_ENCODIERTE_URL_HIER";
+    // const WEB_APP_URL = atob(encodedUrl);
 
     function displayMessage(message, typeClass) {
       const resultElement = document.getElementById('result');
@@ -156,7 +165,7 @@
       setTimeout(() => {
         document.getElementById('result').innerHTML = '';
         startScanner();
-      }, 5000);
+      }, 3000);
     }
 
     window.addEventListener('load', startScanner);
