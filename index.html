@@ -10,18 +10,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
+    html, body {
+      margin: 0; 
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+
     body {
       font-family: 'Orbitron', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
-      color: #fff;
-      text-align: center;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
       align-items: center;
       justify-content: flex-start;
+      /* Alle Elemente um 100% vergrößern */
+      transform: scale(2);
+      transform-origin: top left;
+      
+      /* Crazy tribal Hintergrundmuster: Kombination aus radialen Kreisen und gradient */
+      background:
+        radial-gradient(circle at 20% 20%, #00ffcc 2%, transparent 2%) repeat,
+        radial-gradient(circle at 80% 80%, #ff3333 2%, transparent 2%) repeat,
+        linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+      background-size: 100px 100px;
+      color: #fff;
+      text-align: center;
       padding-top: 50px;
     }
 
@@ -38,6 +51,8 @@
       border: 2px solid #00ffcc;
       box-shadow: 0 0 10px #00ffcc;
       padding: 10px;
+      /* Damit das Kamerabild nicht über den Rand hinausgeht */
+      overflow: hidden;
     }
 
     #result {
@@ -83,7 +98,7 @@
   </style>
 </head>
 <body>
-  <h1>Reisegruppe Verdächtig TICKET SCANNER with love <3 </h1>
+  <h1>Reisegruppe Verdächtig<br>TICKET SCANNER with love <3</h1>
   <div id="reader"></div>
   <div id="result"></div>
 
@@ -118,23 +133,13 @@
       })
       .then(response => response.text())
       .then(data => {
-        // Parse the response from the server and decide how to display it
-        // We know server returns:
-        // - "Success: XYZ now used" -> Ticket was OK and now marked as used
-        // - "Ticket already used: XYZ" -> Ticket was already used
-        // - "Error: Code not found" -> Ticket does not exist
-        
         if (data.includes("now used")) {
-          // Ticket was OK
           displayMessage("Reisegruppe Verdächtig Server says : Ticket OK, enjoy the Party!", "message-ok");
         } else if (data.includes("already used")) {
-          // Ticket was already used
           displayMessage("Reisegruppe Verdächtig Server says : Ticket already used, but nice try :P", "message-used");
         } else if (data.includes("Code not found")) {
-          // Ticket does not exist
           displayMessage("Reisegruppe Verdächtig Server says : Ticket does not exist, das hat ein Nachspiel!", "message-invalid");
         } else {
-          // Some other response - treat as invalid
           displayMessage("Reisegruppe Verdächtig Server says : Unexpected response!", "message-invalid");
         }
 
@@ -151,7 +156,7 @@
       setTimeout(() => {
         document.getElementById('result').innerHTML = '';
         startScanner();
-      }, 3000);
+      }, 5000);
     }
 
     window.addEventListener('load', startScanner);
