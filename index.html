@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Futuristic Ticket Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- Futuristic Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+      color: #fff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 50px;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #00ffcc;
+      text-shadow: 0 0 8px #00ffcc;
+    }
+
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 10px #00ffcc;
+      padding: 10px;
+    }
+
+    #result {
+      font-size: 1.5em;
+      margin-top: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+    }
+
+    .message-box {
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      font-size: 1.2em;
+      line-height: 1.4;
+      text-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    /* Futuristic neon styles for different statuses */
+    .message-ok {
+      background-color: #004d40; /* Dark greenish */
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+
+    .message-used {
+      background-color: #4d4d00; /* Dark yellowish */
+      border: 2px solid #ffff66;
+      color: #ffff66;
+      box-shadow: 0 0 10px #ffff66;
+    }
+
+    .message-invalid {
+      background-color: #4d0000; /* Dark reddish */
+      border: 2px solid #ff3333;
+      color: #ff3333;
+      box-shadow: 0 0 10px #ff3333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reisegruppe verdächtig TICKET SCANNER <3</h1>
+  <div id="reader"></div>
+  <div id="result"></div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz3mJncfLJPHxNcs1RyiAqiFpWvQAvtI_7Si_7pzG80IA90SZiMW1Ag_WhzfYlHhMrd/exec'; // Replace with your deployed Apps Script web app URL
+
+    function displayMessage(message, typeClass) {
+      const resultElement = document.getElementById('result');
+      resultElement.innerHTML = `<div class="message-box ${typeClass}">${message}</div>`;
+    }
+
+    let html5QrCode;
+    function startScanner() {
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        codeFoundCallback
+      ).catch(err => console.error("QR Code start error:", err));
+    }
+
+    async function codeFoundCallback(decodedText) {
+      await html5QrCode.stop();
+
+      const params = new URLSearchParams();
+      params.append('code', decodedText);
+      params.append('status', 'used');
+
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: params
+      })
+      .then(response => response.text())
+      .then(data => {
+        // Parse the response from the server and decide how to display it
+        // We know server returns:
+        // - "Success: XYZ now used" -> Ticket was OK and now marked as used
+        // - "Ticket already used: XYZ" -> Ticket was already used
+        // - "Error: Code not found" -> Ticket does not exist
+        
+        if (data.includes("now used")) {
+          // Ticket was OK
+          displayMessage("Reisegruppe Verdächtig Server says : Ticket OK, enjoy the Party!", "message-ok");
+        } else if (data.includes("already used")) {
+          // Ticket was already used
+          displayMessage("Reisegruppe Verdächtig Server says : Ticket already used, but nice try :P", "message-used");
+        } else if (data.includes("Code not found")) {
+          // Ticket does not exist
+          displayMessage("Reisegruppe Verdächtig Server says : Ticket does not exist, das hat ein Nachspiel!", "message-invalid");
+        } else {
+          // Some other response - treat as invalid
+          displayMessage("Reisegruppe Verdächtig Server says : Unexpected response!", "message-invalid");
+        }
+
+        restartScanner();
+      })
+      .catch(err => {
+        console.error(err);
+        displayMessage("Reisegruppe Verdächtig Server says : Could not contact server!", "message-invalid");
+        restartScanner();
+      });
+    }
+
+    function restartScanner() {
+      setTimeout(() => {
+        document.getElementById('result').innerHTML = '';
+        startScanner();
+      }, 3000);
+    }
+
+    window.addEventListener('load', startScanner);
+  </script>
+</body>
+</html>
